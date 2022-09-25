@@ -2,7 +2,7 @@ import time
 import random
 import datetime
 import RPi.GPIO as GPIO
-
+import sys
 
 class laundrytool:
     
@@ -56,7 +56,7 @@ class laundrytool:
         
         
         GPIO.output(self.GPIO_CS, GPIO.HIGH)
-        time.sleep(0.02)
+        time.sleep(0.01)
         
 
         for i in range(framelen, 0, -1):
@@ -68,8 +68,8 @@ class laundrytool:
             else:
                 GPIO.output(self.GPIO_MOSI, GPIO.LOW)
              
-            time.sleep(0.001)
-            self._clkpulse(0.001)
+            time.sleep(0.001/2)
+            self._clkpulse(0.001/2)
             
             if instruction == "READ" and i < 17:
                 rbit = GPIO.input(self.GPIO_MISO)
@@ -77,9 +77,9 @@ class laundrytool:
            
         
         GPIO.output(self.GPIO_MOSI, GPIO.LOW)
-        time.sleep(0.02)
+        time.sleep(0.01)
         GPIO.output(self.GPIO_CS, GPIO.LOW)
-        time.sleep(0.02)
+        time.sleep(0.01)
         return res
 
         
@@ -102,11 +102,24 @@ class laundrytool:
                 
     def readall(self):
         ret = []
+        check = []
         
         for adr in range(64):
             r = self.execute_instruction("READ",adr,0)
             ret.append(r)
             print("checkmem:: read data= %s @ address= %s" % (hex(r), hex(adr)))
+        
+        print("\n")
+        
+        adrl = [7,9,11,18,20,21]
+        for adr in adrl:
+            check.append(ret[adr])
+        if len(set(check)) == 1:
+            print("Adress set is coherent (%s)" % str(check[0]))
+        else:
+            print("Adress set is NOT coherent")
+        
+
             
         return ret
 
@@ -144,19 +157,43 @@ class laundrytool:
         
         for adr in adrl:
             self.execute_instruction("WRITE",adr,tune)
-            print(adr)
+        
+            r = self.execute_instruction("READ",adr,0)
+            if r == tune:
+                print("%s...ok" % str(adr))
+            else:
+                print("%s...error" % str(adr))
+                
             
         self.execute_instruction("EWDS")  
 
-print("slep!")
-time.sleep(13)
-print("go!")
+
+
+
+args = sys.argv[1:]
 obj = laundrytool()
-obj.magic_sequence(100)
-newdat = obj.readall()
+
+if args[0] == '-r':
+    print("presleep! -> setup card connection for dump")
+    time.sleep(12)
+    print("go!")
+    dump = obj.readall()
+    print(dump)
+    
+elif args[0] == '-w':
+    newsolde = args[1]
+    print("presleep! -> setup card connection for write (%s CHF)" % newsolde)
+    time.sleep(12)
+    print("go!")
+    obj.magic_sequence(int(newsolde))
+    
+else:
+    raise Exception("Not valid input args")
+
+
 print("done!")
 
-#obj.spi.close()
+
 
 
 
