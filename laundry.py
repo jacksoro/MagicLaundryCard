@@ -3,6 +3,7 @@ import random
 import datetime
 import RPi.GPIO as GPIO
 import sys
+import pickle
 
 class laundrytool:
     
@@ -202,6 +203,14 @@ if args[0] == '-r':
     print("go!")
     dump = obj.readall()
     print(dump)
+
+    if args[1] is not None:
+
+        filename=str(args[1])+'.pickle'
+    
+        with open(filename, 'wb') as handle:
+            pickle.dump(dump, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        print(f"dumpfile saved in {filename}")
     
 elif args[0] == '-w':
     newsolde = args[1]
