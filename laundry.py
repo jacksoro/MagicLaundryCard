@@ -221,7 +221,12 @@ elif args[0] == '-w':
 
 elif args[0] == '-t':
     obj.check_gpios()
-    
+
+elif args[0] == '-h' or args[0] == '-help':
+    print("read card and store in dummy.pickle file: python3 laundry.py -r dummy\n")
+    print("load card with 200CHF: python3 laundry.py -w 200\n")
+    print("test gpios (all outputs): python3 laundry.py -t")
+
 else:
     raise Exception("Not valid input args")
 
