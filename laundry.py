@@ -13,7 +13,7 @@ class laundrytool:
         
         
         self.GPIO_CS = 5
-        self.GPIO_SCK = 3
+        self.GPIO_SCK = 13
         self.GPIO_MOSI = 7
         self.GPIO_MISO = 11
         
@@ -31,6 +31,29 @@ class laundrytool:
         }   
 
         self.enabled_for_write = False
+
+
+    def check_gpios(self):
+
+        GPIO.setup(self.GPIO_MISO,GPIO.OUT)
+        for t in range(100000):
+                
+            GPIO.output(self.GPIO_MOSI, GPIO.LOW)
+            GPIO.output(self.GPIO_CS, GPIO.LOW)
+            GPIO.output(self.GPIO_SCK, GPIO.LOW)
+            GPIO.output(self.GPIO_MISO, GPIO.LOW)
+
+            time.sleep(0.05)
+
+            GPIO.output(self.GPIO_MOSI, GPIO.HIGH)
+            GPIO.output(self.GPIO_CS, GPIO.HIGH)
+            GPIO.output(self.GPIO_SCK, GPIO.HIGH)
+            GPIO.output(self.GPIO_MISO, GPIO.HIGH)
+
+
+            time.sleep(0.05)
+
+        GPIO.setup(self.GPIO_MISO,GPIO.IN)
 
 
 
@@ -186,6 +209,9 @@ elif args[0] == '-w':
     time.sleep(12)
     print("go!")
     obj.magic_sequence(int(newsolde))
+
+elif args[0] == '-t':
+    obj.check_gpios()
     
 else:
     raise Exception("Not valid input args")
